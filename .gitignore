@@ -29,5 +29,6 @@ export.sql
 .DS_Store
 node_modules/
 npm-debug.log
+vcs.xml
 *.map
 seller-rating-domain/src/main/resources/vitamin/properties/project-local-override.xml
