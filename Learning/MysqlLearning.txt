@@ -1,0 +1,29 @@
+#############################################
+Mysql Note
+Reference to 高性能MySQL
+#############################################
+
+1（P121） Difference between Timestamp and DateTime
+         +-------------------+------------------------+
+　　   | 列类型　　　　   | 显示格式　　  |
+　　   | timestamp(14) | yyyymmddhhmmss |　
+　　   | timestamp(12) | yymmddhhmmss　 |
+　　   | timestamp(10) | yymmddhhmm　    |
+　   　| timestamp(8)　| yyyymmdd　         |
+　　   | timestamp(6)　| yymmdd　　　　 |
+　　   | timestamp(4)　| yymm　　　　　 |
+　　   | timestamp(2)　| yy　　　　　　   |
+　　   +-------------------+———————  +
+
+你可以在创建表时指定一个任意的显示尺寸，但是定义列长为0或比14大均会被强制定义为列长14。
+
+　　列长在从1～13范围的奇数值尺寸均被强制为下一个更大的偶数。
+
+　　定义字段长度　　 强制字段长度
+
+　　timestamp(0) ->　timestamp(14)
+　　timestamp(15)->　timestamp(14)
+　　timestamp(1) ->　timestamp(2)
+　　timestamp(5) ->　timestamp(6)
+
+2（P113）TinyInt(N) 或者Int(N)里面的N对实际的取值范围、存储和计算都没有任何影响，仅在部分的client端的显示有影响（目前没找到有影响的client）
