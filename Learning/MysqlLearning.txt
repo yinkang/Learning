@@ -48,4 +48,18 @@ Start with "---" means need attention.
 
 5(P118) Blob or text 属于超长的字节码和字符串,可以用order by sustring(column,length)来按照其一部分长度进行排序,但是不能用其所有的长度进行索引,也不能用索引来消除排序（need further learning）
 
-6(P124) Enum 类型在插入的时候是不区分大小写的,但是会按照实际的情况对
+6(P124)
+1)Enum 类型在插入的时候是不区分大小写的,但是会按照实际的情况按照实际enum的大小写来 format 如 enum为‘DOG’,插入‘doG’ 就会被format成‘DOG’;
+2)Enum 字段这是按照内部存储的整数而不是定义的字符串进行排序的。可以在定义的时候按照字母排序来定义或者使用field()函数。
+Related SQL:
+select enum_name + 0 from table_name;
+select * from table_name order by field('enum_name','type1','type2','type3');
+
+7(P121) query_cache_type
+query_cache_type
+Related SQL:
+show variables like '%query_cache%';
+set query_cache_type = 0;
+
+8(P125) 在选择标识符（用于与其他表进行比较如在关联操作的时候）,不同表的标志符的字段必须要精确匹配。（在InnoDB引擎中,类型不完全匹配时不允许创建外键,但是长度不同的varchar是例外）
+推荐使用int,不推荐varchar和
