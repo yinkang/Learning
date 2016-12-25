@@ -62,4 +62,4 @@ show variables like '%query_cache%';
 set query_cache_type = 0;
 
 8(P125) 在选择标识符（用于与其他表进行比较如在关联操作的时候）,不同表的标志符的字段必须要精确匹配。（在InnoDB引擎中,类型不完全匹配时不允许创建外键,但是长度不同的varchar是例外）
-推荐使用int,不推荐varchar和
+推荐使用int,不推荐varchar和enum类型.
