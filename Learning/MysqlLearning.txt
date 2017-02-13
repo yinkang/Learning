@@ -5,15 +5,15 @@ Start with "---" means need attention.
 #############################################
 
 1（P121） Difference between Timestamp and DateTime
-         +-------------------+------------------------+
-　　   | 列类型　　　　   | 显示格式　　  |
-　　   | timestamp(14) | yyyymmddhhmmss |　
-　　   | timestamp(12) | yymmddhhmmss　 |
-　　   | timestamp(10) | yymmddhhmm　    |
+         +-------------------+-------------+
+　　   | 列类型　　　　   | 显示格式　　       |
+　　   | timestamp(14) | yyyymmddhhmmss     |　
+　　   | timestamp(12) | yymmddhhmmss　     |
+　　   | timestamp(10) | yymmddhhmm　       |
 　   　| timestamp(8)　| yyyymmdd　         |
-　　   | timestamp(6)　| yymmdd　　　　 |
-　　   | timestamp(4)　| yymm　　　　　 |
-　　   | timestamp(2)　| yy　　　　　　   |
+　　   | timestamp(6)　| yymmdd　　　　      |
+　　   | timestamp(4)　| yymm　　　　　      |
+　　   | timestamp(2)　| yy　　　　　　       |
 　　   +-------------------+———————  +
 
 你可以在创建表时指定一个任意的显示尺寸，但是定义列长为0或比14大均会被强制定义为列长14。
@@ -46,7 +46,8 @@ Start with "---" means need attention.
 保存的是字节码而不是字符串,其他的与varchar与char之间基本类似
 ---binary在检索时会自动填充 \0 会影响检索效果
 
-5(P118) Blob or text 属于超长的字节码和字符串,可以用order by sustring(column,length)来按照其一部分长度进行排序,但是不能用其所有的长度进行索引,也不能用索引来消除排序（need further learning）
+5(P118) Blob or text 属于超长的字节码和字符串,可以用order by sustring(column,length)来按照其一部分长度进行排序,
+但是不能用其所有的长度进行索引,也不能用索引来消除排序（need further learning）
 
 6(P124)
 1)Enum 类型在插入的时候是不区分大小写的,但是会按照实际的情况按照实际enum的大小写来 format 如 enum为‘DOG’,插入‘doG’ 就会被format成‘DOG’;
@@ -61,8 +62,8 @@ Related SQL:
 show variables like '%query_cache%';
 set query_cache_type = 0;
 
-8(P125) 在选择标识符（用于与其他表进行比较如在关联操作的时候）,不同表的标志符的字段必须要精确匹配（类型,长度）。（在InnoDB引擎中,类型不完全匹配时不允许创建外键,但是长度不同的varchar是例外）
-推荐使用int,不推荐varchar和enum类型.
+8(P125) 在选择标识符（用于与其他表进行比较如在关联操作的时候）,不同表的标志符的字段必须要精确匹配（类型,长度）。
+（在InnoDB引擎中,类型不完全匹配时不允许创建外键,但是长度不同的varchar是例外）推荐使用int,不推荐varchar和enum类型.
 
 9(P132)
 1)汇总表: 在需要执行需要查询几乎所有的表的操作的时候,可以使用汇总表,先将其汇总信息保存在一个新表中,使用不完全同步的信息,或者使用增量同步的方式实现信息的完全同步
@@ -70,13 +71,16 @@ set query_cache_type = 0;
 3)计数器表,应用在表中保存计数器时,可能会导致锁问题,这时可以将计数器保存在很多行中,每次更新的时候,随机选择一项进行更新。
 
 10(P142)
-Btree 索引:MySQL 索引的实现是在引擎层的,如果没有指明索引类型,一般都是BTree索引。BTree 索引适用于全键值、键值范围或者键前缀查找。其中键前缀查找只适用于最左键前缀查找。不支持部分索引。
+Btree 索引:MySQL 索引的实现是在引擎层的,如果没有指明索引类型,一般都是BTree索引。
+BTree 索引适用于全键值、键值范围或者键前缀查找。其中键前缀查找只适用于最左键前缀查找。不支持部分索引。
 Hash 索引 :  优点,全值查找时速度非常快。
-             限制,①哈希索引只保存哈希值和行指针,并不保存数据值,因此不能使用索引中的值来避免读取行。②因为哈希索引不是按照值排序的,因此无法排序。③不支持部分索引值匹配。④只支持等值匹配如=或者<>,不支持范围查询。
+             限制,①哈希索引只保存哈希值和行指针,并不保存数据值,因此不能使用索引中的值来避免读取行。②因为哈希索引不是按照值排序的,因此无法排序。
+                 ③不支持部分索引值匹配。④只支持等值匹配如=或者<>,不支持范围查询。
                  ④当两行的哈希值相同时（即哈希冲突）,存储引擎必需遍历链表中所有的行指针,逐行匹配。冲突越多,索引查找速度越慢,索引的维护代价越大。
 
 11(P149)
-触发器,可用于在指定在数据在被INSERT,UPDATE和DELETE的时候执行指定的操作,其中有BEFORE 和AFTER 两种时间,与对应的条件组合起来共有6种触发器,一个表不可能有两个相同条件下的触发器,因为一个触发器中可以执行多个语句。
+触发器,可用于在指定在数据在被INSERT,UPDATE和DELETE的时候执行指定的操作,其中有BEFORE 和AFTER 两种时间,与对应的条件组合起来共有6种触发器,
+一个表不可能有两个相同条件下的触发器,因为一个触发器中可以执行多个语句。
 DELIMITER $  /*因为在trigger_stmt中可能有很多个语句,语句之间要用";"分隔,而";"在sql中会被认为是一个语句的结束语句,因此将分隔符改成$或者其他符号都可以*/
 CREATE TRIGGER trigger_name
 BEFORE|AFTER
@@ -138,6 +142,7 @@ InnoDB默认的最大填充因子是页大小的15/16,留出部分空间用于�
 如果索引中包含所需要查询的字段的值,我们称之为覆盖索引。
 哈希索引,空间索引和全文索引不包含列的值,因此无法实现覆盖索引。目前只有BTree索引支持覆盖索引。
 如果覆盖索引包含select时所需的所有的量,则在select无需访问table data
+Explain出来的extra列值为using index说明MySQL使用了索引来匹配。
 
 19（P173）---ICP(Index Condition PushDown)索引条件推送
 Definition:Without ICP, the storage engine traverses the index to locate rows in the base table
@@ -148,4 +153,51 @@ Purpose:The goal of ICP is to reduce the number of full-record reads and thereby
 This strategy can be used for InnoDB and MyISAM tables.
 (Note that index condition pushdown is not supported with partitioned tables in MySQL 5.6; this issue is resolved in MySQL 5.7.)
 For InnoDB tables, however, ICP is used only for secondary indexes.
+
+20 (P175)索引排序
+MySQL生成有序结果的两种方式:通过排序操作;按照索引顺序扫描。
+Explain出来的type列值为index说明MySQL使用了索引扫描来做排序。
+设计索引时,最好即满足排序,又可用于查找行。
+使用索引排序的条件
+①只有当索引的列顺序和ORDER BY子句的顺序完全一致,并且所有列的排序方式（倒序或者正序）都一样时,MySQL才能够使用索引对结果进行排序。
+②如果查询需要关联多张表时,只有ORDER BY子句所引用的字段全部在第一张表中时才可使用索引排序
+③ORDER BY也需要满足索引的最左前缀要求。
+④若不满足索引的最左前缀条件,前导列为常量时也满足要求。
+（如tb_name存在索引idx_date_name（date,name） 则 select * from tb_name where date = '2012-12-12' order by name 也可使用索引排列。）
+
+21（P177）索引压缩
+1)myisam使用前缀压缩来减少索引的大小，从而让更多的索引可以放入内存中，默认只压缩字符串，但通过参数配置也可以对整数做压缩.(PACK_KEYS 为1时,数字和字符串都会压缩,)
+myisam压缩每个索引块的方法是，先完全保存索引块中的第一个值，然后将其他值和第一个值进行比较得到相同前缀的字节数（长度）和剩余的不同后缀部分（即把相同部分去掉），
+把这部分存储起来即可（相同前缀长度和不同后缀部分字符串）。
+如：索引块中的第一个值是perform，第二个是performance，那么第二个值的前缀压缩后存储的是类似7,ance，这样的形式，myisam对行指针也采用类似的前缀压缩方式。
+2)压缩块使用更少的空间，代价是某些操作可能更慢，因为每个值的压缩前缀都依赖于前面的值，所以myisam查找时无法在索引块使用二分查找而只能从头开始扫描，正序的扫描速度还不错，
+但如果是倒序扫描，如：order by desc就不是很好了，所有在块中查找某一行的操作平均都需要扫描半个索引块。
+3)测试表明，对于CPU密集型应用，因为扫描需要随机查找，压缩索引使得myisam在索引查找上要慢好几倍，压缩索引的倒序扫描就更慢了，
+压缩索引需要在CPU内存资源与磁盘之间做权衡，压缩索引可能只需要十分之一大小的磁盘，如果是IO密集型应用，对于某些查询带来的好处会比成本多很多。
+即压缩索引适合IO密集型应用，不太适合CPU密集型应用。
+{扩展:CPU-bound(计算密集型) 和I/O bound(I/O密集型):
+I/O bound 指的是系统的CPU效能相对硬盘/内存的效能要好很多，此时，系统运作，大部分的状况是 CPU 在等 I/O (硬盘/内存) 的读/写，此时 CPU Loading 不高。
+CPU bound 指的是系统的 硬盘/内存 效能 相对 CPU 的效能 要好很多，此时，系统运作，大部分的状况是 CPU Loading 100%，CPU 要读/写 I/O (硬盘/内存)，
+I/O在很短的时间就可以完成，而 CPU 还有许多运算要处理，CPU Loading 很高。
+}
+
+22 (P179)冗余与重复索引
+如果创建了索引（A,B）,再创建索引(A)就是冗余索引。
+但是对于索引排序时,对于前缀索引的前导列为常量的部分,如select * from tb_name where A = ? order by C.此时,如果将索引（A）扩展为（A，B）就会导致索引排序失效。
+{扩展
+QPS query per second
+工具:common_schema,可以生成不同的表的数据。原理可能是通过触发器的方式实现。
+}
+
+23 (P8)隔离级别
+READ UNCOMMITTED(未提交读)
+READ COMMITTED(提交读)     大部分数据库的默认隔离级别
+REPEATABLE READ(可重复读)   MySQL的默认隔离级别
+SERIALIZABLE(可串行化)
+脏数据               事务读取到未提交的数据
+不可重复读            事务读取数据之后,原数据被删除或者修改,事务再次读取时数据不一致（主要在 delete 和 update 操作）
+幻读(Phantom Read)   事务读取一个范围的数据之后,此时其他事务插入此范围的数据,事务会发现已经还有部分数据是该事务未读取到的（主要在 insert 操作）
+
+23（P10）自动提交
+---在支持事务的表中（如 InnoDB 支持事务,而 MyISAM 不支持事务）默认是一个操作执行了之后自动提交, 如果设置 autocommit=0,则在执行一个操作之后不会自动提交,知道执行commit。
 
