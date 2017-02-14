@@ -153,6 +153,7 @@ Purpose:The goal of ICP is to reduce the number of full-record reads and thereby
 This strategy can be used for InnoDB and MyISAM tables.
 (Note that index condition pushdown is not supported with partitioned tables in MySQL 5.6; this issue is resolved in MySQL 5.7.)
 For InnoDB tables, however, ICP is used only for secondary indexes.
+在MySQL版本低于5.6的版本中,数据库的storage engine会将将数据返回到 Server 端之后进行 where 筛选,因此需要使用延迟关联。
 
 20 (P175)索引排序
 MySQL生成有序结果的两种方式:通过排序操作;按照索引顺序扫描。
@@ -198,6 +199,17 @@ SERIALIZABLE(可串行化)
 不可重复读            事务读取数据之后,原数据被删除或者修改,事务再次读取时数据不一致（主要在 delete 和 update 操作）
 幻读(Phantom Read)   事务读取一个范围的数据之后,此时其他事务插入此范围的数据,事务会发现已经还有部分数据是该事务未读取到的（主要在 insert 操作）
 
-23（P10）自动提交
+24（P10）自动提交
 ---在支持事务的表中（如 InnoDB 支持事务,而 MyISAM 不支持事务）默认是一个操作执行了之后自动提交, 如果设置 autocommit=0,则在执行一个操作之后不会自动提交,知道执行commit。
 
+25 (p183) 索引案例学习
+1)尽可能重用索引
+在设计支持多重条件搜索的需求时,为减少索引的数量,可以将选择性低且possible value较少的列放在索引前缀用于存放索引,如sex,当不需要这一列的search的select的时候,直接使用 in
+包含所有的值即可，以此方法实现的组合数不能太多,如 sex（F and M） 和 eye_color(brown,blue,hazel)就有 2*3 种组合,当组合数达到上千个的时候需要小心。
+2)避免范围查询
+MySQL无法使用范围查询后的条件的索引,但是对于等值查询是可以的。
+3)优化排序
+在排序搜索时,如果查询的结果太多,如几百万行,然后where只有sex列,如果需要排序
+在对于选择性低的列,我们可以增加一些索引用于排序,如（sex,rating）,并使用 order by 和 limit 如下:
+select * from db_name where sex = 'm' order by rating limit 10;
+在MySQL低于5.6的版本中,也可以使用延迟关联来提高效率
