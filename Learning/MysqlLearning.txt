@@ -48,6 +48,7 @@ Start with "---" means need attention.
 
 5(P118) Blob or text 属于超长的字节码和字符串,可以用order by sustring(column,length)来按照其一部分长度进行排序,
 但是不能用其所有的长度进行索引,也不能用索引来消除排序（need further learning）
+eg: alter tb_name add key [indexName](column_name(length))
 
 6(P124)
 1)Enum 类型在插入的时候是不区分大小写的,但是会按照实际的情况按照实际enum的大小写来 format 如 enum为‘DOG’,插入‘doG’ 就会被format成‘DOG’;
@@ -223,12 +224,40 @@ select * from db_name where sex = 'm' order by rating limit 10;
 ④重复查询相同的数据
 2)确认MySQL服务器是否在分析大量超过需要的数据列
 判断依据
-①响应时间
+①响应时间:服务时间与排队时间之和
 ②扫描的行数
 ③返回的行数
 
 27 Join 时 Using 与 on 的区别
 Using 要求两个表中的列名称类型必需完全相等,select 出的数据相同的列只会出现一次
-on 则允许更灵活的名称,并且 select 出来相同的列会出现两次。
+on 则允许更灵活的名称,并且 select 出来相同的列会出现两次。`
  Select * from table_a a join table_b b on a.id = b.id（此时id列会在结果中出现两次）在选择相等的时必需使用 tb_name.col_name 的形式来查询,否则
  Select * from table_a join table_b using(id)(此时id列会在结果中出现一次)
+
+28 Key 与 Index 的区别
+1)key 是数据库的物理结构，它包含两层意义，一是约束（偏重于约束和规范数据库的结构完整性），二是索引（辅助查询用的）。包括primary key, unique key, foreign key 等。
+  primary key 有两个作用，一是约束作用（constraint），用来规范一个存储主键和唯一性，但同时也在此key上建立了一个index；
+  unique key 也有两个作用，一是约束作用（constraint），规范数据的唯一性，但同时也在这个key上建立了一个index；
+  foreign key也有两个作用，一是约束作用（constraint），规范数据的引用完整性，但同时也在这个key上建立了一个index；
+  可见，mysql的key是同时具有constraint和index的意义，这点和其他数据库表现的可能有区别。（至少在oracle上建立外键，不会自动建立index），因此创建key也有如下几种方式：
+  （1）在字段级以key方式建立， 如 create table t (id int not null primary key);
+  （2）在表级以constraint方式建立，如create table t(id int, CONSTRAINT pk_t_id PRIMARY key (id));
+  （3）在表级以key方式建立，如create table t(id int, primary key (id));
+  其它key创建类似，但不管那种方式，既建立了constraint，又建立了index，只不过index使用的就是这个constraint或key。
+2)index是数据库的物理结构，它只是辅助查询的，它创建时会在另外的表空间（mysql中的innodb表空间）以一个类似目录的结构存储。索引要分类的话，分为前缀索引、全文本索引等；
+  因此，索引只是索引，它不会去约束索引的字段的行为（那是key要做的事情）。
+  如，create table t(id int, index inx_tx_id  (id));
+
+29 (P201)重构查询的方式
+1)切分查询,如删除掉表中的1,000,000,000 条数据, 可以通过每次删除一万条的方式实现。
+2)分解关联操作,在关联两张很大的表时,可以通过分解每条单独的查询吼在应用程序中关联,有以下好处
+①提高缓存命中率,将每个单独的查询缓存后命中率远比关联后的查询的命中率高
+②执行单个查询减少锁的竞争
+③在应用层进行拆分,可以更容易对数据库进行拆分,更容易做到高性能和可扩展。
+④减少冗余查询,在应用层关联时,以为对一些记录只需要查询一次,而在数据库中关联时可能需要重复访问一部分数据。
+⑤在应用中可以使用哈希关联的方式实现,而不需要使用MySQL的嵌套循环关联。
+
+30 Join 的各种区别:
+left join  = left outer join
+right join = right outer join
+inner join
