@@ -202,7 +202,7 @@ SERIALIZABLE(可串行化)
 24（P10）自动提交
 ---在支持事务的表中（如 InnoDB 支持事务,而 MyISAM 不支持事务）默认是一个操作执行了之后自动提交, 如果设置 autocommit=0,则在执行一个操作之后不会自动提交,知道执行commit。
 
-25 (p183) 索引案例学习
+25 (P183) 索引案例学习
 1)尽可能重用索引
 在设计支持多重条件搜索的需求时,为减少索引的数量,可以将选择性低且possible value较少的列放在索引前缀用于存放索引,如sex,当不需要这一列的search的select的时候,直接使用 in
 包含所有的值即可，以此方法实现的组合数不能太多,如 sex（F and M） 和 eye_color(brown,blue,hazel)就有 2*3 种组合,当组合数达到上千个的时候需要小心。
@@ -213,3 +213,22 @@ MySQL无法使用范围查询后的条件的索引,但是对于等值查询是�
 在对于选择性低的列,我们可以增加一些索引用于排序,如（sex,rating）,并使用 order by 和 limit 如下:
 select * from db_name where sex = 'm' order by rating limit 10;
 在MySQL低于5.6的版本中,也可以使用延迟关联来提高效率
+
+26 (P195) 查询性能优化
+对于低效的查询,可以通过以下两个步骤来分析:
+1)确认应用程序是否在检索大量超过需要的数据,意味着访问了太多的行或者列
+①查询不需要的记录
+②多变关联时返回全部列
+③总是取出全部列
+④重复查询相同的数据
+2)确认MySQL服务器是否在分析大量超过需要的数据列
+判断依据
+①响应时间
+②扫描的行数
+③返回的行数
+
+27 Join 时 Using 与 on 的区别
+Using 要求两个表中的列名称类型必需完全相等,select 出的数据相同的列只会出现一次
+on 则允许更灵活的名称,并且 select 出来相同的列会出现两次。
+ Select * from table_a a join table_b b on a.id = b.id（此时id列会在结果中出现两次）在选择相等的时必需使用 tb_name.col_name 的形式来查询,否则
+ Select * from table_a join table_b using(id)(此时id列会在结果中出现一次)
